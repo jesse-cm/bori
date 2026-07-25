@@ -1,0 +1,9 @@
+.build/
+dist/
+.DS_Store
+.swiftpm/
+# design export reference — contains third-party GIFs, never commit
+uploads/
+# session state and shelf snapshots are user data, not source
+shelf/
+session.json

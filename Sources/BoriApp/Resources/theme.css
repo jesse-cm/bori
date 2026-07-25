@@ -1,0 +1,120 @@
+/* Bori — reading-room theme
+ * Extracted from Claude Design export, 2026-07-24.
+ * Light = paper, dark = lamplight. The Bori screen is ALWAYS dark
+ * in both modes (it's a device, not a surface).
+ */
+
+:root {
+  /* paper (light mode) */
+  --bg: #F7F1E5;
+  --ink: #3E3830;
+  --muted: #8C8270;
+  --hairline-strong: #C9BDA3;
+  --hairline: #E4DAC6;
+  --amber: #B8860B;
+  --panel-border: #C9BDA3;
+
+  /* the screen — mode-invariant pair, see [data-mode] below */
+  --screen-bg: #241E17;
+  --screen-border: #3E3830;
+  --screen-cream: #EFE5D0;
+  --screen-amber: #C99544;
+
+  --font-serif: "Fraunces", Georgia, serif;
+  --menu-width: 260px;
+}
+
+[data-mode="dark"] {
+  --bg: #241E17;
+  --ink: #EFE5D0;
+  --muted: #8F8570;
+  --hairline-strong: #4A4132;
+  --hairline: #4A4132;
+  --amber: #C99544;
+  --panel-border: #4A4132;
+
+  --screen-bg: #1B1610;
+  --screen-border: #4A4132;
+}
+
+/* ---- panel ---- */
+
+.panel {
+  width: var(--menu-width);
+  box-sizing: border-box;
+  background: var(--bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 0;            /* sharp corners are the design */
+  padding: 12px 12px 4px;
+  font-family: var(--font-serif);
+  color: var(--ink);
+}
+
+.screen {
+  position: relative;
+  height: 161px;
+  background: var(--screen-bg);
+  border: 1.5px solid var(--screen-border);
+  border-radius: 0;
+  overflow: hidden;
+}
+
+/* ---- text ---- */
+
+.status {
+  padding: 14px 2px 12px;
+  font-size: 15px;
+  line-height: 1.45;
+  font-weight: 500;
+}
+
+.status .dash { color: var(--amber); }
+
+.detail {
+  padding: 0 2px 14px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+/* ---- menu ---- */
+
+.menu { border-top: 0.5px solid var(--hairline-strong); }
+
+.menu-item {
+  padding: 9px 2px;
+  font-size: 13.5px;
+  color: var(--ink);
+  border-top: 0.5px solid var(--hairline);
+  cursor: default;
+}
+
+.menu-item:first-child { border-top: none; }
+
+.menu-item.unavailable { color: var(--muted); }
+.menu-item.unavailable .note { font-style: italic; }
+.menu-item .dash { color: var(--amber); }
+
+/* ---- shelf entries ---- */
+
+.shelf-entry { padding: 10px 2px; border-top: 0.5px solid var(--hairline); }
+.shelf-entry:first-child { border-top: none; }
+.shelf-entry .when { font-size: 13.5px; color: var(--ink); }
+.shelf-entry .what { font-size: 12px; color: var(--muted); padding-top: 3px; }
+
+/* ---- bori screen animations ---- */
+
+@keyframes bori-breathe {
+  0%, 100% { opacity: 0.7; }
+  45%      { opacity: 1; }
+}
+
+@keyframes bori-blink {
+  0%, 93%, 100% { background: transparent; }
+  95%, 97%      { background: var(--screen-cream); }
+}
+
+@keyframes bori-z {
+  0%, 100% { opacity: 0.12; }
+  50%      { opacity: 1; }
+}
