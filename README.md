@@ -32,7 +32,12 @@ whole interface.
 
 ## Building
 
-Requires macOS 13+ and Xcode's Swift toolchain. No dependencies.
+No dependencies on either platform. `swift test` runs the engine and
+hosts-file test suites everywhere.
+
+### macOS
+
+Requires macOS 13+ and Xcode's Swift toolchain.
 
 ```sh
 scripts/make-app.sh
@@ -48,7 +53,28 @@ macOS will ask for two permissions, once each:
   Background. Until then, site blocking is logged but not enforced, and
   the panel shows a line that takes you there.
 
-`swift test` runs the engine and hosts-file test suites.
+### Windows
+
+Requires the Swift toolchain for Windows —
+[swift.org/install](https://www.swift.org/install/windows/), or
+`winget install --id Swift.Toolchain`. Then, from the repo:
+
+```powershell
+swift build -c release
+.\.build\release\BoriWindows.exe
+```
+
+The tray icon appears in the notification area; the menu holds the same
+text lines, and the config lives at `%USERPROFILE%\.bori.toml` (a
+starter file is written on first run). Two things to know:
+
+- **Site blocking needs elevation** — run `BoriWindows.exe` as
+  administrator, since it edits
+  `%SystemRoot%\System32\drivers\etc\hosts` directly for now. Without
+  it, sessions still run and apps are still put away; sites are not.
+- **The browser sweep, tab cap, and interlude are not on Windows yet**
+  (`docs/windows.md` has the plan). The Windows build compiles and
+  tests in CI on every push, but it is young — expect edges.
 
 ## Configuration
 
