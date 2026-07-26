@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  macos:
+    name: macOS — full build and tests
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - run: swift build
+      - run: swift test
+
+  windows:
+    # The macOS-only layers (AppKit shell, AppleScript sweep, XPC helper)
+    # compile out behind os(macOS); this proves the session engine and
+    # hosts-file logic build and pass their tests on Windows.
+    name: Windows — engine build and tests
+    runs-on: windows-latest
+    steps:
+      - uses: compnerd/gha-setup-swift@v3
+        with:
+          branch: swift-6.0.3-release
+          tag: 6.0.3-RELEASE
+      - uses: actions/checkout@v4
+      - run: swift build
+      - run: swift test

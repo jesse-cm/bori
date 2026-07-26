@@ -1,3 +1,4 @@
+#if os(macOS)
 import AppKit
 import BoriEngine
 
@@ -345,3 +346,4 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         return "on \(formatter.string(from: date)) at \(time(date))"
     }
 }
+#endif

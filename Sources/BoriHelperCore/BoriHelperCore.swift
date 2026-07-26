@@ -6,6 +6,7 @@ public enum BoriHelperConstants {
     public static let plistName = "app.bori.helper.plist"
 }
 
+#if os(macOS)
 /// The XPC surface of the helper. Deliberately tiny: set the blocked
 /// hosts (with a deadline the daemon self-clears at, in case the app
 /// never comes back), or clear them.
@@ -16,6 +17,7 @@ public enum BoriHelperConstants {
     func setBlockedHosts(_ hosts: [String], untilEpoch: Double, reply: @escaping (String?) -> Void)
     func clearBlockedHosts(reply: @escaping (String?) -> Void)
 }
+#endif
 
 /// Pure /etc/hosts editing around the bori marker block. No I/O here —
 /// the daemon reads and writes; this only transforms text, so it is

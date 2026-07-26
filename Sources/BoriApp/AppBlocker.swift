@@ -1,3 +1,4 @@
+#if os(macOS)
 import AppKit
 
 /// Polite enforcement of the app blocklist: blocked apps are asked to
@@ -34,3 +35,4 @@ final class AppBlocker {
         }
     }
 }
+#endif

@@ -1,3 +1,4 @@
+#if os(macOS)
 import Foundation
 
 /// The page a wandering tab is turned to during a session — never a
@@ -106,3 +107,4 @@ enum Interlude {
         try? html.write(to: fileURL, atomically: true, encoding: .utf8)
     }
 }
+#endif

@@ -1,3 +1,4 @@
+#if os(macOS)
 import AppKit
 import WebKit
 
@@ -125,3 +126,4 @@ final class PanelController: NSObject, WKScriptMessageHandler, WKNavigationDeleg
         }
     }
 }
+#endif

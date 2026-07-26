@@ -1,3 +1,4 @@
+#if os(macOS)
 import Foundation
 
 /// Writes dated, importable bookmarks files (Netscape format) to
@@ -65,3 +66,4 @@ final class ShelfWriter {
             .replacingOccurrences(of: "\"", with: "&quot;")
     }
 }
+#endif

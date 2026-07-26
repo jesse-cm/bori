@@ -1,3 +1,4 @@
+#if os(macOS)
 import Foundation
 
 struct MenuLine: Equatable {
@@ -73,3 +74,4 @@ enum PanelHTML {
         """
     }
 }
+#endif

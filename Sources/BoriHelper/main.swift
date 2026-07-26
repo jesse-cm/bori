@@ -1,3 +1,4 @@
+#if os(macOS)
 import Foundation
 import BoriHelperCore
 
@@ -94,3 +95,8 @@ let delegate = HelperDelegate()
 listener.delegate = delegate
 listener.resume()
 RunLoop.main.run()
+#else
+// On Windows the equivalent will be a small elevated service editing
+// %SystemRoot%\\System32\\drivers\\etc\\hosts with the same HostsFile logic.
+print("The Bori helper is macOS-only for now.")
+#endif

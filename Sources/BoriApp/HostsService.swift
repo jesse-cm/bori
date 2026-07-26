@@ -1,3 +1,4 @@
+#if os(macOS)
 import Foundation
 import ServiceManagement
 import BoriHelperCore
@@ -80,3 +81,4 @@ final class HostsService {
         } as? BoriHelperProtocol
     }
 }
+#endif

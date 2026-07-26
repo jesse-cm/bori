@@ -1,3 +1,4 @@
+#if os(macOS)
 import Foundation
 
 /// Persists the running session across relaunches, so restarting the app
@@ -36,3 +37,4 @@ enum SessionStore {
         try? FileManager.default.removeItem(at: url)
     }
 }
+#endif
