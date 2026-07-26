@@ -91,6 +91,31 @@ final class Sweeper {
         }
     }
 
+    /// During a session: any tab sitting on a blocked host is turned to
+    /// the interlude page. /etc/hosts only stops new connections — an
+    /// open tab keeps its established one — so within one poll cycle the
+    /// tab becomes a quiet encouragement instead. Never a punishment.
+    func redirectTabs(matching blockedHosts: [String], to destination: URL) {
+        guard !blockedHosts.isEmpty else { return }
+        let needles = blockedHosts.map { $0.lowercased() }
+        for browser in Browser.allCases where browser.isRunning {
+            var commands: [String] = []
+            for (windowIndex, window) in snapshot(browser).enumerated() {
+                for (index, tab) in window.tabs.enumerated() {
+                    guard let host = URL(string: tab.url)?.host?.lowercased(),
+                          needles.contains(where: { host == $0 || host.hasSuffix("." + $0) })
+                    else { continue }
+                    commands.append(
+                        "\ttry\n\t\tset URL of tab \(index + 1) of window \(windowIndex + 1) " +
+                        "to \"\(destination.absoluteString)\"\n\tend try")
+                }
+            }
+            guard !commands.isEmpty else { continue }
+            run("tell application \"\(browser.appName)\"\n\(commands.joined(separator: "\n"))\nend tell")
+            NSLog("[bori] %d tab(s) were turned to the interlude", commands.count)
+        }
+    }
+
     // MARK: - Snapshot
 
     private func snapshot(_ browser: Browser) -> [WindowSnapshot] {

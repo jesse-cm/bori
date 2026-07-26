@@ -14,10 +14,35 @@ swift build -c release
 
 APP=dist/Bori.app
 rm -rf "$APP"
-mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
+mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources" "$APP/Contents/Library/LaunchDaemons"
 
 cp .build/release/Bori "$APP/Contents/MacOS/Bori"
+cp .build/release/BoriHelper "$APP/Contents/MacOS/BoriHelper"
 cp -R .build/release/Bori_BoriApp.bundle "$APP/Contents/Resources/"
+
+# The privileged helper: launchd starts Contents/MacOS/BoriHelper as
+# root on demand, once the user has approved it in Login Items.
+cat > "$APP/Contents/Library/LaunchDaemons/app.bori.helper.plist" <<'PLIST'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>app.bori.helper</string>
+	<key>BundleProgram</key>
+	<string>Contents/MacOS/BoriHelper</string>
+	<key>MachServices</key>
+	<dict>
+		<key>app.bori.helper</key>
+		<true/>
+	</dict>
+	<key>AssociatedBundleIdentifiers</key>
+	<array>
+		<string>app.bori.mac</string>
+	</array>
+</dict>
+</plist>
+PLIST
 
 cat > "$APP/Contents/Info.plist" <<'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>
@@ -56,5 +81,6 @@ cat > "$APP/Contents/Info.plist" <<'PLIST'
 </plist>
 PLIST
 
+codesign --force --sign - "$APP/Contents/MacOS/BoriHelper"
 codesign --force --sign - "$APP"
 echo "built $APP — launch with: open $APP"

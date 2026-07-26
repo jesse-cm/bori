@@ -11,10 +11,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private let sweeper = Sweeper()
     private let blocker = AppBlocker()
-    private let hosts = HostsHelperStub()
+    private let hosts = HostsService()
 
     private var tickTimer: Timer?
     private var enforceTimer: Timer?
+    private var enforceTickCount = 0
     private var lastSweep: SweepResult?
 
     private let timeFormatter: DateFormatter = {
@@ -40,10 +41,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             self?.handle(action: action)
         }
 
+        hosts.registerIfNeeded()
+
         // A restored session was already swept at its true beginning;
         // just pick the enforcement back up.
         if case .running = engine.state(at: Date()) {
             startEnforcement(sweep: false)
+        } else {
+            // No session — clear any block a crash may have left behind.
+            hosts.unblock()
         }
 
         tickTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
@@ -68,6 +74,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 startEnforcement(sweep: true)
             case .sessionExtended:
                 SessionStore.save(engine.session)
+                // Refresh the helper's self-clear deadline and the
+                // interlude's closing line.
+                hosts.block(config.blockedHosts, until: engine.session?.end)
+                if let end = engine.session?.end {
+                    Interlude.write(endsText: time(end))
+                }
             case .sessionEnded:
                 SessionStore.clear()
                 stopEnforcement()
@@ -85,6 +97,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             process(events: engine.begin(at: Date()))
         case "extend":
             process(events: engine.extend(at: Date()))
+        case "settings":
+            panelController.hide()
+            openSettings()
+        case "loginitems":
+            panelController.hide()
+            hosts.openLoginItems()
         default:
             break
         }
@@ -109,10 +127,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 NSLog("[bori] the shelf could not be written: %@", "\(error)")
             }
         }
-        hosts.block(config.blockedHosts)
+        hosts.block(config.blockedHosts, until: engine.session?.end)
+        if let end = engine.session?.end {
+            Interlude.write(endsText: time(end))
+        }
         blocker.reset()
         enforceTimer?.invalidate()
-        enforceTimer = Timer.scheduledTimer(withTimeInterval: 5, repeats: true) { [weak self] _ in
+        enforceTickCount = 0
+        // Tabs on shelved sites are put away within a second — before a
+        // page can meaningfully render; the gentler app and tab-cap
+        // checks keep their five-second rhythm.
+        enforceTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
             self?.enforce()
         }
         enforce()
@@ -127,11 +152,29 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func enforce() {
-        blocker.enforce(blockedApps: config.blockedApps)
-        sweeper.enforceTabCap(config.tabCap)
+        sweeper.redirectTabs(matching: config.blockedHosts, to: Interlude.fileURL)
+        if enforceTickCount % 5 == 0 {
+            blocker.enforce(blockedApps: config.blockedApps)
+            sweeper.enforceTabCap(config.tabCap)
+        }
+        enforceTickCount += 1
     }
 
     // MARK: - Config
+
+    /// Opens ~/.bori.toml in the default editor — the file stays the only
+    /// interface; this line just walks you to it.
+    private func openSettings() {
+        writeSampleConfigIfMissing()
+        let url = URL(fileURLWithPath: BoriConfig.defaultPath)
+        if !NSWorkspace.shared.open(url) {
+            // No editor claims .toml — fall back to TextEdit.
+            if let textEdit = NSWorkspace.shared.urlForApplication(withBundleIdentifier: "com.apple.TextEdit") {
+                NSWorkspace.shared.open([url], withApplicationAt: textEdit,
+                                        configuration: NSWorkspace.OpenConfiguration())
+            }
+        }
+    }
 
     private func writeSampleConfigIfMissing() {
         let path = BoriConfig.defaultPath
@@ -146,8 +189,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         guard modified != configModified else { return }
         configModified = modified
         do {
+            let previousHosts = config.blockedHosts
             config = try BoriConfig.load()
             engine?.updateConfig(config)
+            // Editing the config is the sanctioned mid-session override;
+            // apply a changed host list right away.
+            if let engine, case .running = engine.state(at: Date()), config.blockedHosts != previousHosts {
+                if config.blockedHosts.isEmpty {
+                    hosts.unblock()
+                } else {
+                    hosts.block(config.blockedHosts, until: engine.session?.end)
+                }
+            }
         } catch {
             NSLog("[bori] ~/.bori.toml could not be read (%@) — the previous settings remain", "\(error)")
         }
@@ -209,7 +262,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                         html: "End the session <span class=\"note\">— it ends on its own</span>",
                         unavailable: true
                     ),
-                ]
+                    helperLine,
+                    settingsLine,
+                ].compactMap { $0 }
             )
 
         case .scheduled(let nextStart, let minutes):
@@ -223,10 +278,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                         action: "begin"
                     ),
                     MenuLine(
-                        html: "The schedule <span class=\"note\">— \(minutes) minutes, set in ~/.bori.toml</span>",
+                        html: "The schedule <span class=\"note\">— \(minutes) minutes</span>",
                         unavailable: true
                     ),
-                ]
+                    helperLine,
+                    settingsLine,
+                ].compactMap { $0 }
             )
 
         case .idle:
@@ -239,13 +296,28 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                         html: "Begin a session <span class=\"dash\">—</span> \(config.sessionMinutes) minutes",
                         action: "begin"
                     ),
-                    MenuLine(
-                        html: "No schedule is set <span class=\"note\">— add one in ~/.bori.toml</span>",
-                        unavailable: true
-                    ),
-                ]
+                    helperLine,
+                    settingsLine,
+                ].compactMap { $0 }
             )
         }
+    }
+
+    private var settingsLine: MenuLine {
+        MenuLine(
+            html: "Open the settings <span class=\"dash\">—</span> apps, sites, schedule",
+            action: "settings"
+        )
+    }
+
+    /// Shown only while sites are configured but the helper still waits
+    /// for its one-time approval — a text line, never a prompt.
+    private var helperLine: MenuLine? {
+        guard !config.blockedHosts.isEmpty, !hosts.isReady else { return nil }
+        return MenuLine(
+            html: "Approve site blocking <span class=\"dash\">—</span> open Login Items",
+            action: "loginitems"
+        )
     }
 
     private func shelfSummary() -> String {

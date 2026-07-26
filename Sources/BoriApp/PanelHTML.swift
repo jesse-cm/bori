@@ -21,8 +21,8 @@ struct PanelModel: Equatable {
 enum PanelHTML {
     static let panelWidth: CGFloat = 260
 
-    private static let css = load("theme", "css")
-    private static let js = load("bori-screen", "js")
+    static let css = load("theme", "css")
+    static let js = load("bori-screen", "js")
 
     private static func load(_ name: String, _ ext: String) -> String {
         guard let url = Bundle.module.url(forResource: name, withExtension: ext),
