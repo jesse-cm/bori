@@ -1,7 +1,9 @@
 # Bori
 
-Bori is a small macOS menu bar companion that puts the loud parts of your
-computer away for a while. When a session begins, your browser windows are
+Bori is a small menu bar companion that puts the loud parts of your
+computer away for a while — macOS today, with a Windows port under way
+(the session engine already builds and passes its tests on Windows in
+CI; see `docs/windows.md` for what remains). When a session begins, your browser windows are
 shelved into a dated bookmarks file, distracting apps are politely asked to
 leave, and distracting sites stop resolving — and any tab that wanders back
 to one is quietly turned into a page with an encouraging quote instead.
