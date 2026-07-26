@@ -22,13 +22,13 @@ final class WindowsAppBlocker {
 
         let list = WindowList()
         let callback: WNDENUMPROC = { window, lParam in
-            guard let window, IsWindowVisible(window) != 0 else { return 1 }
+            guard let window, IsWindowVisible(window) else { return true }
             var pid: DWORD = 0
-            GetWindowThreadProcessId(window, &pid)
-            guard pid != 0, let raw = UnsafeRawPointer(bitPattern: Int(lParam)) else { return 1 }
+            _ = GetWindowThreadProcessId(window, &pid)
+            guard pid != 0, let raw = UnsafeRawPointer(bitPattern: Int(lParam)) else { return true }
             let list = Unmanaged<WindowList>.fromOpaque(raw).takeUnretainedValue()
             list.entries.append((window, pid))
-            return 1
+            return true
         }
         let context = Unmanaged.passUnretained(list).toOpaque()
         _ = EnumWindows(callback, LPARAM(Int(bitPattern: context)))
@@ -53,13 +53,13 @@ final class WindowsAppBlocker {
     }
 
     private func executableName(of pid: DWORD) -> String? {
-        guard let handle = OpenProcess(DWORD(PROCESS_QUERY_LIMITED_INFORMATION), 0, pid) else {
+        guard let handle = OpenProcess(DWORD(PROCESS_QUERY_LIMITED_INFORMATION), false, pid) else {
             return nil
         }
-        defer { CloseHandle(handle) }
+        defer { _ = CloseHandle(handle) }
         var buffer = [WCHAR](repeating: 0, count: 260)
         var size = DWORD(buffer.count)
-        guard QueryFullProcessImageNameW(handle, 0, &buffer, &size) != 0 else { return nil }
+        guard QueryFullProcessImageNameW(handle, 0, &buffer, &size) else { return nil }
         let path = String(decodingCString: buffer, as: UTF16.self)
         return path.split(separator: "\\").last.map { $0.lowercased() }
     }

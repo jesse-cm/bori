@@ -176,16 +176,15 @@ func showTrayMenu(_ window: HWND?) {
     }
 
     var point = POINT()
-    GetCursorPos(&point)
-    SetForegroundWindow(window)
-    let picked = TrackPopupMenu(
+    _ = GetCursorPos(&point)
+    _ = SetForegroundWindow(window)
+    // Selection arrives as WM_COMMAND (TPM_RETURNCMD's return value is
+    // unusable from Swift — the BOOL import swallows the command id).
+    _ = TrackPopupMenu(
         menu,
-        UINT(TPM_RETURNCMD) | UINT(TPM_NONOTIFY) | UINT(TPM_RIGHTBUTTON),
+        UINT(TPM_RIGHTBUTTON),
         point.x, point.y, 0, window, nil
     )
-    if picked > 0 {
-        BoriWindowsApp.shared.handle(command: UINT_PTR(picked))
-    }
 }
 
 func boriWndProc(_ window: HWND?, _ message: UINT, _ wParam: WPARAM, _ lParam: LPARAM) -> LRESULT {
@@ -195,6 +194,9 @@ func boriWndProc(_ window: HWND?, _ message: UINT, _ wParam: WPARAM, _ lParam: L
         if event == UINT(WM_LBUTTONUP) || event == UINT(WM_RBUTTONUP) {
             showTrayMenu(window)
         }
+        return 0
+    case UINT(WM_COMMAND):
+        BoriWindowsApp.shared.handle(command: UINT_PTR(wParam & 0xFFFF))
         return 0
     case UINT(WM_TIMER):
         BoriWindowsApp.shared.tick()
@@ -245,18 +247,18 @@ withUnsafeMutableBytes(of: &iconData.szTip) { destination in
         destination.copyBytes(from: source.prefix(destination.count))
     }
 }
-_ = Shell_NotifyIconW(NIM_ADD, &iconData)
+_ = Shell_NotifyIconW(DWORD(NIM_ADD), &iconData)
 
 _ = SetTimer(window, 1, 1000, nil)
 BoriWindowsApp.shared.tick()
 
 var message = MSG()
-while GetMessageW(&message, nil, 0, 0) > 0 {
-    TranslateMessage(&message)
-    DispatchMessageW(&message)
+while GetMessageW(&message, nil, 0, 0) {
+    _ = TranslateMessage(&message)
+    _ = DispatchMessageW(&message)
 }
 
-_ = Shell_NotifyIconW(NIM_DELETE, &iconData)
+_ = Shell_NotifyIconW(DWORD(NIM_DELETE), &iconData)
 #else
 print("This executable is the Windows tray app; on this platform, use the Bori app instead.")
 #endif
