@@ -7,3 +7,4 @@ uploads/
 # session state and shelf snapshots are user data, not source
 shelf/
 session.json
+interlude.html
