@@ -20,6 +20,13 @@ let package = Package(
             dependencies: ["BoriHelperCore"],
             path: "Sources/BoriHelper"
         ),
+        // The Windows tray app: same engine, Win32 enforcement layer.
+        // Compiles to a stub on other platforms.
+        .executableTarget(
+            name: "BoriWindows",
+            dependencies: ["BoriEngine", "BoriHelperCore"],
+            path: "Sources/BoriWindows"
+        ),
         .executableTarget(
             name: "BoriApp",
             dependencies: ["BoriEngine", "BoriHelperCore"],

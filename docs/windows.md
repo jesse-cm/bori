@@ -6,6 +6,23 @@ pass their tests on Windows — CI proves this on every push. What remains
 is the enforcement and display layer, which was always designed to be
 swapped per platform.
 
+## Status
+
+`Sources/BoriWindows` is the first cut of that layer: a native Win32
+tray app (`BoriWindows.exe`) running the same engine and the same
+`.bori.toml` — sessions, schedules, the extend-only ratchet, hosts
+blocking with the shared marker-block logic plus `ipconfig /flushdns`,
+and polite app blocking (`WM_CLOSE`, then hide). It builds in CI on
+every push but has not yet been exercised on a physical Windows
+machine — treat it as a candidate, not a release. Known limits:
+
+- Hosts blocking needs the app run as administrator until the elevated
+  service exists; without elevation it logs calmly and skips.
+- No browser sweep, tab cap, or interlude yet — those wait on Chrome
+  DevTools Protocol (step 4 below).
+- The dropdown is a native popup menu of text lines, not yet the
+  WebView2 panel with the dot-matrix Bori.
+
 ## What maps to what
 
 | macOS layer | Windows equivalent |

@@ -15,10 +15,10 @@ jobs:
       - run: swift test
 
   windows:
-    # The macOS-only layers (AppKit shell, AppleScript sweep, XPC helper)
-    # compile out behind os(macOS); this proves the session engine and
-    # hosts-file logic build and pass their tests on Windows.
-    name: Windows — engine build and tests
+    # Builds the whole package — including the BoriWindows tray app —
+    # and runs the engine and hosts-file tests. The macOS-only layers
+    # (AppKit shell, AppleScript sweep, XPC helper) compile out.
+    name: Windows — build and tests
     runs-on: windows-latest
     steps:
       - uses: compnerd/gha-setup-swift@v0.4.0
