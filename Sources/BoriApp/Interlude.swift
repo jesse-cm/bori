@@ -26,6 +26,19 @@ enum Interlude {
         Quote(text: "If there's a book that you want to read, but it hasn't been written yet, then you must write it.", who: "Toni Morrison"),
         Quote(text: "It is not that we have a short time to live, but that we waste a lot of it.", who: "Seneca"),
         Quote(text: "The art of being wise is the art of knowing what to overlook.", who: "William James"),
+        Quote(text: "Well-behaved women seldom make history.", who: "Laurel Thatcher Ulrich"),
+        Quote(text: "No one can make you feel inferior without your consent.", who: "Eleanor Roosevelt"),
+        Quote(text: "Women belong in all places where decisions are being made.", who: "Ruth Bader Ginsburg"),
+        Quote(text: "I am not free while any woman is unfree, even when her shackles are very different from my own.", who: "Audre Lorde"),
+        Quote(text: "Each time a woman stands up for herself, without knowing it possibly, without claiming it, she stands up for all women.", who: "Maya Angelou"),
+        Quote(text: "If they don't give you a seat at the table, bring a folding chair.", who: "Shirley Chisholm"),
+        Quote(text: "Above all, be the heroine of your life, not the victim.", who: "Nora Ephron"),
+        Quote(text: "I'm no longer accepting the things I cannot change. I'm changing the things I cannot accept.", who: "Angela Davis"),
+        Quote(text: "The most common way people give up their power is by thinking they don't have any.", who: "Alice Walker"),
+        Quote(text: "I raise up my voice — not so that I can shout, but so that those without a voice can be heard.", who: "Malala Yousafzai"),
+        Quote(text: "Think like a queen. A queen is not afraid to fail. Failure is another stepping stone to greatness.", who: "Oprah Winfrey"),
+        Quote(text: "Courage calls to courage everywhere.", who: "Millicent Fawcett"),
+        Quote(text: "Feminism is the radical notion that women are people.", who: "Marie Shear"),
     ]
 
     static var fileURL: URL {
