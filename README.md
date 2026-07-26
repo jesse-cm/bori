@@ -18,8 +18,9 @@ Bori is opinionated about how focus tools should behave:
   thing Bori has, and it only moves the end further away.
 - **Nothing is punished.** Apps that refuse to quit are hidden, never
   force-killed. Blocked tabs aren't slammed shut — they're turned to an
-  interlude page with words from Maya Angelou, Octavia Butler, Grace
-  Hopper, Mary Oliver, and friends.
+  interlude page with an encouraging quote, most of them by women:
+  Maya Angelou, Octavia Butler, Grace Hopper, Mary Oliver, Marie Curie,
+  Toni Morrison, Audre Lorde, and friends.
 - **Nothing is restored automatically.** Snapshots go to the shelf as
   plain, importable bookmarks files. What returns is up to you.
 
@@ -37,8 +38,9 @@ Bori is opinionated about how focus tools should behave:
    DNS cache. The block clears when the session ends — and the helper
    carries its own deadline, so the block lapses even if the app dies.
 4. **Wandering tabs.** Once a second, any tab sitting on a blocked host is
-   turned to the interlude — a quote picked at random, and a note of when
-   the session ends.
+   turned to the interlude — an empowering quote picked at random, mostly
+   from women writers, scientists, and pioneers, and a note of when the
+   session ends.
 
 Sessions begin from the menu bar dropdown or on a schedule. The dropdown
 is a single quiet panel: the dot-matrix Bori (asleep during a session,
